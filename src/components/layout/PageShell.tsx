@@ -55,7 +55,7 @@ export default function PageShell({
       className={cn(
         'min-w-0 bg-[#0a0a0a] text-white',
         fullHeight ? 'min-h-screen' : '',
-        !noTopPad && 'pt-16 lg:pt-[72px]',
+        !noTopPad && 'pt-[68px]',
         !noHorizPad && 'pb-20 lg:pb-10',
         className
       )}

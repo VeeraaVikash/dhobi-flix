@@ -149,7 +149,7 @@ export default function MovieActions({
         <motion.div whileTap={{ scale: 0.96 }}>
           <Link
             href={watchHref}
-            className="flex items-center gap-2 px-6 py-3 bg-white text-black rounded-sm font-bold text-sm hover:bg-zinc-200 transition-colors"
+            className="flex items-center gap-2 px-6 py-3 bg-[#e50914] text-white rounded-sm font-bold text-sm hover:bg-red-700 transition-colors shadow-lg shadow-red-900/20"
           >
             <Play size={18} fill="currentColor" />
             Play
@@ -197,7 +197,7 @@ export default function MovieActions({
       <motion.div whileTap={{ scale: 0.95 }}>
         <Link
           href={watchHref}
-          className="flex items-center gap-2.5 pl-5 pr-6 py-3 bg-white text-black rounded-sm font-bold text-sm hover:bg-zinc-200 transition-colors"
+          className="flex items-center gap-2.5 pl-5 pr-6 py-3 bg-[#e50914] text-white rounded-sm font-bold text-sm hover:bg-red-700 transition-colors shadow-lg shadow-red-900/20"
         >
           <Play size={20} fill="currentColor" />
           Play
@@ -263,7 +263,7 @@ export default function MovieActions({
         <motion.button
           whileTap={{ scale: 0.9 }}
           onClick={onDownload}
-          className="w-11 h-11 rounded-full border-2 border-zinc-500 text-white hover:border-white flex items-center justify-center transition-all duration-200"
+          className="w-11 h-11 rounded-full border border-white/20 bg-white/10 backdrop-blur-md text-white hover:bg-white/20 hover:border-white/40 flex items-center justify-center transition-all duration-200 shadow-xl"
           aria-label="Download"
         >
           <Download size={16} />

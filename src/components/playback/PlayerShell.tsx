@@ -201,6 +201,15 @@ export default function PlayerShell({
                 )}
               </div>
 
+              {/* DRM Badge */}
+              {manifest.drmScheme && (
+                <div className="hidden sm:block pointer-events-auto" onClick={(e) => e.stopPropagation()}>
+                  <span className="px-1.5 py-0.5 bg-zinc-800 text-zinc-400 border border-zinc-700 rounded-sm text-[10px] font-mono font-semibold uppercase tracking-wider">
+                    {manifest.drmScheme}
+                  </span>
+                </div>
+              )}
+
               {/* Edge Badge */}
               {edge && (
                 <div className="pointer-events-auto" onClick={(e) => e.stopPropagation()}>
@@ -213,7 +222,7 @@ export default function PlayerShell({
       </AnimatePresence>
 
       {/* Player Controls (bottom) */}
-      <div className="pointer-events-auto z-30" onClick={(e) => e.stopPropagation()}>
+      <div className="absolute inset-0 pointer-events-none z-30 flex items-end" onClick={(e) => e.stopPropagation()}>
         <PlayerControls
           session={session}
           bufferedSeconds={bufferedSeconds}
@@ -231,6 +240,7 @@ export default function PlayerShell({
           onSubtitleChange={onSubtitleChange ?? (() => {})}
           onRateChange={onRateChange ?? (() => {})}
           visible={controlsVisible}
+          className="pointer-events-auto w-full"
         />
       </div>
 

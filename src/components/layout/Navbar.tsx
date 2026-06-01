@@ -14,6 +14,8 @@ import {
   Download,
   List,
   Film,
+  Menu,
+  X,
 } from 'lucide-react';
 import { ROUTES } from '@/constants/routes';
 import { cn } from '@/lib/utils';
@@ -40,10 +42,12 @@ export default function Navbar() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchValue, setSearchValue] = useState('');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const profileRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 20);
@@ -56,6 +60,9 @@ export default function Navbar() {
     const handler = (e: MouseEvent) => {
       if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
         setProfileOpen(false);
+      }
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(e.target as Node)) {
+        setMobileMenuOpen(false);
       }
     };
     document.addEventListener('mousedown', handler);
@@ -91,23 +98,64 @@ export default function Navbar() {
     >
       <div className="mx-auto px-4 sm:px-8 lg:px-12 max-w-[1800px]">
         <div className="flex items-center h-16 lg:h-[72px] gap-6 lg:gap-10">
-          {/* Logo */}
-          <Link
-            href={ROUTES.HOME}
-            className="flex-shrink-0 flex items-center gap-2 group"
-            aria-label="DhobiFlix Home"
-          >
-            <Film
-              size={22}
-              className="text-[#e50914] group-hover:scale-110 transition-transform duration-200"
-            />
-            <span className="text-white font-black text-xl tracking-tight hidden sm:block">
-              Dhobi<span className="text-[#e50914]">Flix</span>
-            </span>
-          </Link>
+          {/* Logo (Left) */}
+          <div className="flex-1 flex items-center">
+            {/* Mobile Hamburger */}
+            <div ref={mobileMenuRef} className="lg:hidden relative mr-4">
+              <button
+                onClick={() => setMobileMenuOpen((v) => !v)}
+                className="text-zinc-300 hover:text-white transition-colors p-1"
+                aria-label="Toggle mobile menu"
+              >
+                {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              </button>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-1" aria-label="Main navigation">
+              <AnimatePresence>
+                {mobileMenuOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="absolute top-full left-0 mt-4 w-48 bg-[#141414] border border-zinc-800 rounded-md shadow-2xl py-2 z-50 flex flex-col"
+                  >
+                    {NAV_LINKS.map(({ label, href }) => {
+                      const active = pathname === href || pathname.startsWith(href + '?');
+                      return (
+                        <Link
+                          key={label}
+                          href={href}
+                          onClick={() => setMobileMenuOpen(false)}
+                          className={cn(
+                            'px-4 py-3 text-sm font-medium transition-colors',
+                            active ? 'text-white border-l-2 border-[#e50914] bg-white/5' : 'text-zinc-400 hover:text-white hover:bg-white/5 border-l-2 border-transparent'
+                          )}
+                        >
+                          {label}
+                        </Link>
+                      );
+                    })}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            <Link
+              href={ROUTES.HOME}
+              className="flex-shrink-0 flex items-center gap-2 group"
+              aria-label="DhobiFlix Home"
+            >
+              <Film
+                size={22}
+                className="text-[#e50914] group-hover:scale-110 transition-transform duration-200"
+              />
+              <span className="text-white font-black text-xl tracking-tight hidden sm:block">
+                Dhobi<span className="text-[#e50914]">Flix</span>
+              </span>
+            </Link>
+          </div>
+
+          {/* Desktop Navigation (Center) */}
+          <nav className="hidden lg:flex items-center gap-2 justify-center flex-1" aria-label="Main navigation">
             {NAV_LINKS.map(({ label, href }) => {
               const active = pathname === href || pathname.startsWith(href + '?');
               return (
@@ -127,11 +175,8 @@ export default function Navbar() {
             })}
           </nav>
 
-          {/* Spacer */}
-          <div className="flex-1" />
-
           {/* Right Controls */}
-          <div className="flex items-center gap-2 lg:gap-3">
+          <div className="flex-1 flex items-center justify-end gap-2 lg:gap-3">
             {/* Search */}
             <AnimatePresence mode="wait">
               {searchOpen ? (

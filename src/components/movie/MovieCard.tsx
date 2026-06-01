@@ -63,7 +63,9 @@ export default function MovieCard({
   const year = getYear(media);
   const href = getDetailHref(media);
   const watchHref = getWatchHref(media);
-  const genres = getGenreNames(media.genre_ids, media.media_type as 'movie' | 'tv').slice(0, 2);
+  const genres = (!media.genre_ids || media.genre_ids.length === 0) 
+    ? [] 
+    : getGenreNames(media.genre_ids, media.media_type as 'movie' | 'tv').slice(0, 2);
   const rating = media.vote_average.toFixed(1);
   const posterUrl = getPosterUrl(media.poster_path, 'w342');
 

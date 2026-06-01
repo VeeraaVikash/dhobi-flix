@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, ChevronLeft } from 'lucide-react';
@@ -18,6 +18,7 @@ interface MovieRowProps {
 }
 
 const SCROLL_AMOUNT = 0.75; // fraction of container width per click
+const SCROLL_IDLE_DELAY_MS = 200;
 
 export default function MovieRow({
   title,
@@ -28,8 +29,23 @@ export default function MovieRow({
   onAction,
 }: MovieRowProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollEndTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
+  const [isScrolling, setIsScrolling] = useState(false);
+
+  const markScrolling = useCallback(() => {
+    setIsScrolling(true);
+
+    if (scrollEndTimerRef.current) {
+      clearTimeout(scrollEndTimerRef.current);
+    }
+
+    scrollEndTimerRef.current = setTimeout(() => {
+      setIsScrolling(false);
+      scrollEndTimerRef.current = null;
+    }, SCROLL_IDLE_DELAY_MS);
+  }, []);
 
   const updateScrollState = useCallback(() => {
     const el = scrollRef.current;
@@ -38,12 +54,34 @@ export default function MovieRow({
     setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 8);
   }, []);
 
+  const handleRowScroll = useCallback(() => {
+    markScrolling();
+    updateScrollState();
+  }, [markScrolling, updateScrollState]);
+
   const scroll = useCallback((dir: 'left' | 'right') => {
     const el = scrollRef.current;
     if (!el) return;
+    markScrolling();
     const amount = el.clientWidth * SCROLL_AMOUNT;
     el.scrollBy({ left: dir === 'right' ? amount : -amount, behavior: 'smooth' });
-  }, []);
+  }, [markScrolling]);
+
+  useEffect(() => {
+    window.addEventListener('scroll', markScrolling, { passive: true });
+    window.addEventListener('wheel', markScrolling, { passive: true });
+    window.addEventListener('touchmove', markScrolling, { passive: true });
+
+    return () => {
+      window.removeEventListener('scroll', markScrolling);
+      window.removeEventListener('wheel', markScrolling);
+      window.removeEventListener('touchmove', markScrolling);
+
+      if (scrollEndTimerRef.current) {
+        clearTimeout(scrollEndTimerRef.current);
+      }
+    };
+  }, [markScrolling]);
 
   if (media.length === 0) return null;
 
@@ -129,7 +167,14 @@ export default function MovieRow({
         {/* Cards */}
         <div
           ref={scrollRef}
-          onScroll={updateScrollState}
+          onScroll={handleRowScroll}
+          onTouchStart={markScrolling}
+          onTouchMove={markScrolling}
+          onPointerDown={(event) => {
+            if (event.pointerType !== 'mouse') {
+              markScrolling();
+            }
+          }}
           className="flex gap-2 md:gap-3 overflow-x-auto scrollbar-hide px-4 sm:px-8 lg:px-12 py-4 scroll-smooth"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
@@ -141,7 +186,7 @@ export default function MovieRow({
               transition={{ delay: Math.min(idx * 0.04, 0.4), duration: 0.3 }}
               className="w-[140px] sm:w-[160px] lg:w-[190px] flex-shrink-0"
             >
-              <MovieCard media={item} onAction={onAction} />
+              <MovieCard media={item} onAction={onAction} isScrolling={isScrolling} />
             </motion.div>
           ))}
         </div>

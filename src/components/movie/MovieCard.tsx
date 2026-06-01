@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Plus, Check, ThumbsUp, ChevronDown, Star } from 'lucide-react';
@@ -23,6 +23,8 @@ interface MovieCardProps {
   compact?: boolean;
   /** Is this item currently in the user's list? */
   inList?: boolean;
+  /** Disable hover previews while a containing row or page is scrolling */
+  isScrolling?: boolean;
 }
 
 function getTitle(media: Movie | TVShow): string {
@@ -48,6 +50,8 @@ function getWatchHref(media: Movie | TVShow): string {
     : ROUTES.WATCH_TV(media.id, 1, 1);
 }
 
+const HOVER_PREVIEW_DELAY_MS = 320;
+
 export default function MovieCard({
   media,
   progressPercent,
@@ -55,8 +59,11 @@ export default function MovieCard({
   onAction,
   compact = false,
   inList = false,
+  isScrolling = false,
 }: MovieCardProps) {
   const [hovered, setHovered] = useState(false);
+  const [canHoverPreview, setCanHoverPreview] = useState(false);
+  const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const title = getTitle(media);
   const year = getYear(media);
@@ -67,12 +74,66 @@ export default function MovieCard({
     : getGenreNames(media.genre_ids, media.media_type as 'movie' | 'tv').slice(0, 2);
   const rating = media.vote_average.toFixed(1);
   const posterUrl = getPosterUrl(media.poster_path, 'w342');
+  const previewEnabled = !compact && canHoverPreview && !isScrolling;
+
+  const clearHoverTimer = () => {
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current);
+      hoverTimerRef.current = null;
+    }
+  };
+
+  const closePreview = () => {
+    clearHoverTimer();
+    setHovered(false);
+  };
+
+  const schedulePreview = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType !== 'mouse' || !previewEnabled) return;
+
+    clearHoverTimer();
+    hoverTimerRef.current = setTimeout(() => {
+      if (!isScrolling) {
+        setHovered(true);
+      }
+    }, HOVER_PREVIEW_DELAY_MS);
+  };
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(hover: hover) and (pointer: fine)');
+    const updateCanHover = () => setCanHoverPreview(mediaQuery.matches);
+
+    updateCanHover();
+    mediaQuery.addEventListener('change', updateCanHover);
+
+    return () => {
+      mediaQuery.removeEventListener('change', updateCanHover);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!previewEnabled || isScrolling) {
+      closePreview();
+    }
+  }, [previewEnabled, isScrolling]);
+
+  useEffect(() => {
+    return () => clearHoverTimer();
+  }, []);
 
   return (
     <motion.div
       className={cn('relative rounded-sm overflow-visible flex-shrink-0', className)}
-      onHoverStart={() => !compact && setHovered(true)}
-      onHoverEnd={() => !compact && setHovered(false)}
+      onPointerEnter={schedulePreview}
+      onPointerLeave={closePreview}
+      onPointerCancel={closePreview}
+      onPointerDown={(event) => {
+        if (event.pointerType !== 'mouse') {
+          closePreview();
+        }
+      }}
+      onTouchStart={closePreview}
+      onTouchMove={closePreview}
       animate={hovered ? { scale: 1.06, zIndex: 20 } : { scale: 1, zIndex: 1 }}
       transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
     >
@@ -101,7 +162,7 @@ export default function MovieCard({
 
       {/* Hover Overlay Card */}
       <AnimatePresence>
-        {hovered && !compact && (
+        {hovered && previewEnabled && (
           <motion.div
             initial={{ opacity: 0, y: 8, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}

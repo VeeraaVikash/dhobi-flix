@@ -34,6 +34,16 @@ export default function SearchPageClient({
   const [filters, setFilters] = useState<SearchFilterState>({
     ...DEFAULT_FILTERS,
     mediaType: (searchParams.get('type') as SearchFilterState['mediaType']) ?? 'all',
+    sortBy: (searchParams.get('sort') as SearchFilterState['sortBy']) ?? DEFAULT_FILTERS.sortBy,
+    language: (searchParams.get('lang') as SearchFilterState['language']) ?? DEFAULT_FILTERS.language,
+    minRating: Number(searchParams.get('rating') ?? DEFAULT_FILTERS.minRating),
+    genreIds: searchParams.get('genre')
+      ? searchParams
+          .get('genre')!
+          .split(',')
+          .map((id) => Number(id))
+          .filter(Number.isFinite)
+      : [],
   });
 
   const handleSearch = useCallback(

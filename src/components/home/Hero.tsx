@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Volume2, VolumeX, Info } from 'lucide-react';
+import { Volume2, VolumeX } from 'lucide-react';
 import MovieActions from '@/components/movie/MovieActions';
 import MovieMeta from '@/components/movie/MovieMeta';
+import SafeImage from '@/components/movie/SafeImage';
 import { getBackdropUrl } from '@/lib/image';
 import { truncateText, cn } from '@/lib/utils';
 import type { Movie, TVShow } from '@/types/movie';
@@ -68,18 +68,15 @@ export default function Hero({ media: initial, items, cycleMs = 7000, className 
           transition={{ duration: 0.8, ease: 'easeOut' }}
           className="absolute inset-0"
         >
-          {current.backdrop_path ? (
-            <Image
-              src={backdropUrl}
-              alt={`${title} backdrop`}
-              fill
-              className="object-cover object-top"
-              priority
-              sizes="100vw"
-            />
-          ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-zinc-900 to-zinc-950" />
-          )}
+          <SafeImage
+            src={current.backdrop_path ? backdropUrl : null}
+            alt={`${title} backdrop`}
+            fill
+            className="object-cover object-top"
+            fallbackLabel={title}
+            preload
+            sizes="100vw"
+          />
         </motion.div>
       </AnimatePresence>
 

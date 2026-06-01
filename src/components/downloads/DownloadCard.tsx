@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -19,6 +18,7 @@ import {
 import { getPosterUrl } from '@/lib/image';
 import { cn, formatBytes, formatDuration, formatDate } from '@/lib/utils';
 import { ROUTES } from '@/constants/routes';
+import SafeImage from '@/components/movie/SafeImage';
 import type { Download as DownloadType } from '@/types/download';
 
 interface DownloadCardProps {
@@ -108,19 +108,14 @@ export default function DownloadCard({
     >
       {/* Poster */}
       <div className="flex-shrink-0 w-[60px] h-[90px] relative rounded-sm overflow-hidden bg-zinc-800">
-        {posterPath ? (
-          <Image
-            src={getPosterUrl(posterPath, 'w154')}
-            alt={title}
-            fill
-            className="object-cover"
-            sizes="60px"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <HardDrive size={18} className="text-zinc-700" />
-          </div>
-        )}
+        <SafeImage
+          src={posterPath ? getPosterUrl(posterPath, 'w154') : null}
+          alt={title}
+          fill
+          className="object-cover"
+          fallbackLabel={title}
+          sizes="60px"
+        />
         {/* Play overlay */}
         {canPlay && (
           <Link

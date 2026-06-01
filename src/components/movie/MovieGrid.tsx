@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { Film } from 'lucide-react';
 import MovieCard from '@/components/movie/MovieCard';
 import { GridSkeleton } from '@/components/home/RowSkeleton';
 import { cn } from '@/lib/utils';
@@ -55,7 +56,7 @@ export default function MovieGrid({
         className="flex flex-col items-center justify-center py-24 gap-4"
       >
         <div className="w-16 h-16 rounded-full bg-zinc-900 flex items-center justify-center">
-          <span className="text-2xl">🎬</span>
+          <Film size={24} className="text-zinc-700" />
         </div>
         <p className="text-zinc-500 text-sm">{emptyMessage}</p>
       </motion.div>

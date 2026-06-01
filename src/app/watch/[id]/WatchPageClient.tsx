@@ -9,20 +9,21 @@ import type { PlaybackSession, PlaybackState, PlaybackRate } from '@/types/playb
 
 interface WatchPageClientProps {
   mediaId: number;
+  mediaType: 'movie' | 'tv';
   title: string;
 }
 
-function createMockSession(mediaId: number): PlaybackSession {
+function createMockSession(mediaId: number, mediaType: 'movie' | 'tv'): PlaybackSession {
   const edge = getBestEdge();
   return {
     id: `sess_${mediaId}_${Date.now().toString(36)}`,
     profileId: 'profile_veeraa',
     accountId: 'account_001',
     mediaId,
-    mediaType: 'movie',
+    mediaType,
     manifest: {
       mediaId,
-      mediaType: 'movie',
+      mediaType,
       manifestUrl: `https://${edge.baseUrl}/hls/${mediaId}/master.m3u8`,
       drmScheme: 'widevine',
       drmLicenseUrl: `https://license.dhobiflix.in/widevine/${mediaId}`,
@@ -92,8 +93,8 @@ function createMockSession(mediaId: number): PlaybackSession {
   };
 }
 
-export default function WatchPageClient({ mediaId, title }: WatchPageClientProps) {
-  const [session, setSession] = useState<PlaybackSession>(() => createMockSession(mediaId));
+export default function WatchPageClient({ mediaId, mediaType, title }: WatchPageClientProps) {
+  const [session, setSession] = useState<PlaybackSession>(() => createMockSession(mediaId, mediaType));
 
   const updateSession = useCallback((updates: Partial<PlaybackSession>) => {
     setSession((prev) => ({ ...prev, ...updates }));
@@ -151,7 +152,7 @@ export default function WatchPageClient({ mediaId, title }: WatchPageClientProps
       <PlayerShell
         session={session}
         title={title}
-        backHref={ROUTES.MOVIE(mediaId)}
+        backHref={mediaType === 'movie' ? ROUTES.MOVIE(mediaId) : ROUTES.TV(mediaId)}
         showTelemetry
         onPlay={handlePlay}
         onPause={handlePause}

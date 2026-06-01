@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Loader2, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Loader2, AlertCircle, Film } from 'lucide-react';
 import PlayerControls from '@/components/playback/PlayerControls';
 import PlaybackTelemetry from '@/components/playback/PlaybackTelemetry';
 import EdgeBadge from '@/components/playback/EdgeBadge';
@@ -126,7 +126,7 @@ export default function PlayerShell({
       <div className="absolute inset-0 bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 flex items-center justify-center">
         <div className="text-center space-y-2 pointer-events-none">
           <div className="w-20 h-20 rounded-full bg-zinc-800/50 flex items-center justify-center mx-auto">
-            <div className="text-3xl">🎬</div>
+            <Film size={32} className="text-zinc-600" />
           </div>
           <p className="text-zinc-600 text-sm font-mono">VIDEO ELEMENT</p>
           <p className="text-zinc-700 text-xs">{manifest.manifestUrl}</p>

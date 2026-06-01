@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { searchMulti, discoverMovies, discoverTV } from '@/lib/tmdb';
 import SearchPageClient from './SearchPageClient';
-import type { Movie, TVShow, SearchMultiResult } from '@/types/movie';
+import type { Movie, TVShow, SearchMultiResult, SortOption } from '@/types/movie';
 
 export const metadata: Metadata = {
   title: 'Search',
@@ -24,27 +24,42 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const params = await searchParams;
   const query = params.q ?? '';
   const page = parseInt(params.page ?? '1', 10);
+  const hasDiscoverParams = Boolean(
+    params.type ||
+      params.sort ||
+      params.genre ||
+      params.lang ||
+      params.rating ||
+      (!query && !params.page)
+  );
 
-  let results: (Movie | TVShow | SearchMultiResult)[] = [];
+  let results: (Movie | TVShow)[] = [];
   let totalPages = 1;
   let totalResults = 0;
 
   if (query.length >= 2) {
     // Text search
     const data = await searchMulti(query, page);
-    results = data.results;
+    results = data.results
+      .filter((item): item is Movie | TVShow =>
+        item.media_type === 'movie' || item.media_type === 'tv'
+      );
     totalPages = data.total_pages;
-    totalResults = data.total_results;
-  } else if (params.sort || params.genre || params.lang) {
+    totalResults = results.length;
+  } else if (hasDiscoverParams) {
     // Discover mode
     const type = params.type ?? 'movie';
+    const sortBy = (params.sort ?? 'popularity.desc') as SortOption;
+    const language = params.lang && params.lang !== 'all' ? params.lang : undefined;
+    const rating = params.rating ? parseFloat(params.rating) : undefined;
+
     if (type === 'tv') {
       const data = await discoverTV({
         page,
-        sort_by: (params.sort ?? 'popularity.desc') as 'popularity.desc',
+        sort_by: sortBy,
         with_genres: params.genre,
-        with_original_language: params.lang !== 'all' ? params.lang : undefined,
-        'vote_average.gte': params.rating ? parseFloat(params.rating) : undefined,
+        with_original_language: language,
+        'vote_average.gte': rating,
       });
       results = data.results.map((s) => ({ ...s, media_type: 'tv' as const }));
       totalPages = data.total_pages;
@@ -52,10 +67,10 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     } else {
       const data = await discoverMovies({
         page,
-        sort_by: (params.sort ?? 'popularity.desc') as 'popularity.desc',
+        sort_by: sortBy,
         with_genres: params.genre,
-        with_original_language: params.lang !== 'all' ? params.lang : undefined,
-        'vote_average.gte': params.rating ? parseFloat(params.rating) : undefined,
+        with_original_language: language,
+        'vote_average.gte': rating,
       });
       results = data.results.map((m) => ({ ...m, media_type: 'movie' as const }));
       totalPages = data.total_pages;
@@ -65,7 +80,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
   return (
     <SearchPageClient
-      initialResults={results as (Movie | TVShow)[]}
+      initialResults={results}
       initialQuery={query}
       totalPages={totalPages}
       totalResults={totalResults}

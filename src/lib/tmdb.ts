@@ -27,6 +27,18 @@ import {
 
 // ─── Internal Fetcher ────────────────────────────────────────────────────────
 
+const warnedFallbackPaths = new Set<string>();
+
+class TMDBHttpError extends Error {}
+
+function warnFallback(path: string, error: unknown) {
+  if (warnedFallbackPaths.has(path)) return;
+  warnedFallbackPaths.add(path);
+
+  const message = error instanceof Error ? error.message : String(error);
+  console.warn(`[TMDB] ${path} failed. Using local fallback data. ${message}`);
+}
+
 async function tmdbFetch<T>(
   path: string,
   params: Record<string, string | number | boolean | undefined> = {},
@@ -51,14 +63,18 @@ async function tmdbFetch<T>(
     });
 
     if (!res.ok) {
-      throw new Error(
+      throw new TMDBHttpError(
         `[TMDB] ${res.status} ${res.statusText} — GET ${path}`
       );
     }
 
     return await res.json() as T;
   } catch (error) {
-    console.warn(`[TMDB] Fetch failed for ${path}, using mock fallback.`, error);
+    if (error instanceof TMDBHttpError) {
+      throw error;
+    }
+
+    warnFallback(path, error);
 
     if (
       path.startsWith('/trending/movie') ||
@@ -80,7 +96,9 @@ async function tmdbFetch<T>(
     if (
       path.startsWith('/trending/tv') ||
       path.includes('/tv/popular') ||
-      path.includes('/tv/top_rated')
+      path.includes('/tv/top_rated') ||
+      path.includes('/tv/airing_today') ||
+      path.includes('/discover/tv')
     ) {
       return {
         page: 1,

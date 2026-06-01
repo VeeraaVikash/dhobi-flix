@@ -1,13 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, X, Clock } from 'lucide-react';
 import { getPosterUrl } from '@/lib/image';
 import { formatProgressPercent, formatDuration, cn } from '@/lib/utils';
 import { ROUTES } from '@/constants/routes';
+import SafeImage from '@/components/movie/SafeImage';
 import type { WatchHistoryEntry } from '@/types/profile';
 import type { Movie, TVShow } from '@/types/movie';
 
@@ -68,19 +68,14 @@ function ContinueWatchingItem({ entry, media, onRemove }: ContinueWatchingItemPr
     >
       <div className="relative rounded-sm overflow-hidden bg-zinc-900 aspect-video">
         {/* Backdrop / Poster */}
-        {media.poster_path ? (
-          <Image
-            src={posterUrl}
-            alt={title}
-            fill
-            className="object-cover object-center scale-105"
-            sizes="(max-width: 640px) 220px, (max-width: 1024px) 260px, 300px"
-          />
-        ) : (
-          <div className="absolute inset-0 bg-zinc-800 flex items-center justify-center">
-            <Play size={24} className="text-zinc-600" />
-          </div>
-        )}
+        <SafeImage
+          src={media.poster_path ? posterUrl : null}
+          alt={title}
+          fill
+          className="object-cover object-center scale-105"
+          fallbackLabel={title}
+          sizes="(max-width: 640px) 220px, (max-width: 1024px) 260px, 300px"
+        />
 
         {/* Dark overlay */}
         <div

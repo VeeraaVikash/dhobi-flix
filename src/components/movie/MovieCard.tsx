@@ -1,14 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Plus, Minus, Check, ThumbsUp, ChevronDown, Star } from 'lucide-react';
+import { Play, Plus, Check, ThumbsUp, ChevronDown, Star } from 'lucide-react';
 import { getPosterUrl } from '@/lib/image';
 import { formatYear, truncateText, cn } from '@/lib/utils';
 import { getGenreNames } from '@/constants/genres';
 import { ROUTES } from '@/constants/routes';
+import SafeImage from '@/components/movie/SafeImage';
 import type { Movie, TVShow } from '@/types/movie';
 
 interface MovieCardProps {
@@ -57,7 +57,6 @@ export default function MovieCard({
   inList = false,
 }: MovieCardProps) {
   const [hovered, setHovered] = useState(false);
-  const [imgError, setImgError] = useState(false);
 
   const title = getTitle(media);
   const year = getYear(media);
@@ -79,27 +78,15 @@ export default function MovieCard({
     >
       {/* Poster */}
       <Link href={href} className="block aspect-[2/3] rounded-sm overflow-hidden bg-zinc-900">
-        {!imgError && media.poster_path ? (
-          <Image
-            src={posterUrl}
-            alt={title}
-            width={342}
-            height={513}
-            className="w-full h-full object-cover transition-all duration-300"
-            onError={() => setImgError(true)}
-            sizes="(max-width: 640px) 33vw, (max-width: 1024px) 20vw, 14vw"
-            priority={false}
-          />
-        ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-900 gap-2 p-4">
-            <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center">
-              <Play size={20} className="text-zinc-600 ml-0.5" />
-            </div>
-            <span className="text-zinc-600 text-xs text-center leading-tight line-clamp-2">
-              {title}
-            </span>
-          </div>
-        )}
+        <SafeImage
+          src={media.poster_path ? posterUrl : null}
+          alt={title}
+          width={342}
+          height={513}
+          className="w-full h-full object-cover transition-all duration-300"
+          fallbackLabel={title}
+          sizes="(max-width: 640px) 33vw, (max-width: 1024px) 20vw, 14vw"
+        />
 
         {/* Progress Bar */}
         {typeof progressPercent === 'number' && progressPercent > 0 && (

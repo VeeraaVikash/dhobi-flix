@@ -38,11 +38,10 @@ export default function SearchBox({
   className,
   inputClassName,
 }: SearchBoxProps) {
-  const isControlled = controlledValue !== undefined;
-  const [localValue, setLocalValue] = useState('');
+  const [localValue, setLocalValue] = useState(controlledValue ?? '');
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const value = isControlled ? controlledValue : localValue;
+  const value = localValue;
 
   // Debounced search call
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -57,14 +56,18 @@ export default function SearchBox({
     }
   }, [autoFocus]);
 
+  useEffect(() => {
+    setLocalValue(controlledValue ?? '');
+  }, [controlledValue]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const q = e.target.value;
-    if (!isControlled) setLocalValue(q);
+    setLocalValue(q);
     debouncedSearch(q);
   };
 
   const handleClear = () => {
-    if (!isControlled) setLocalValue('');
+    setLocalValue('');
     onSearch('');
     inputRef.current?.focus();
   };

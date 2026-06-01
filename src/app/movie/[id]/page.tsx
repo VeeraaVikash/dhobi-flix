@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import Image from 'next/image';
 import Link from 'next/link';
 import {
   getMovieDetails,
@@ -16,6 +15,7 @@ import { ROUTES } from '@/constants/routes';
 import MovieActions from '@/components/movie/MovieActions';
 import MovieMeta from '@/components/movie/MovieMeta';
 import MovieRow from '@/components/movie/MovieRow';
+import SafeImage from '@/components/movie/SafeImage';
 import PageShell from '@/components/layout/PageShell';
 import type { Movie, Cast, Video } from '@/types/movie';
 
@@ -83,18 +83,15 @@ export default async function MovieDetailPage({ params }: MoviePageProps) {
     <>
       {/* Backdrop Hero */}
       <section className="relative w-full overflow-hidden" style={{ height: 'min(70vh, 600px)' }}>
-        {movie.backdrop_path ? (
-          <Image
-            src={backdropUrl}
-            alt={`${movie.title} backdrop`}
-            fill
-            className="object-cover object-top"
-            priority
-            sizes="100vw"
-          />
-        ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-zinc-900 to-zinc-950" />
-        )}
+        <SafeImage
+          src={movie.backdrop_path ? backdropUrl : null}
+          alt={`${movie.title} backdrop`}
+          fill
+          className="object-cover object-top"
+          fallbackLabel={movie.title}
+          preload
+          sizes="100vw"
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/40 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a]/80 via-transparent to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[#0a0a0a] to-transparent" />
@@ -107,20 +104,15 @@ export default async function MovieDetailPage({ params }: MoviePageProps) {
             {/* Poster */}
             <div className="flex-shrink-0 w-48 md:w-56 mx-auto md:mx-0">
               <div className="aspect-[2/3] rounded-sm overflow-hidden shadow-2xl shadow-black/60 border border-zinc-800">
-                {movie.poster_path ? (
-                  <Image
-                    src={posterUrl}
-                    alt={movie.title}
-                    width={500}
-                    height={750}
-                    className="w-full h-full object-cover"
-                    priority
-                  />
-                ) : (
-                  <div className="w-full h-full bg-zinc-900 flex items-center justify-center text-zinc-600 text-sm">
-                    No Poster
-                  </div>
-                )}
+                <SafeImage
+                  src={movie.poster_path ? posterUrl : null}
+                  alt={movie.title}
+                  width={500}
+                  height={750}
+                  className="w-full h-full object-cover"
+                  fallbackLabel={movie.title}
+                  loading="eager"
+                />
               </div>
             </div>
 
@@ -234,19 +226,14 @@ export default async function MovieDetailPage({ params }: MoviePageProps) {
                   className="flex-shrink-0 w-24 md:w-28 text-center space-y-2"
                 >
                   <div className="w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden bg-zinc-800 mx-auto">
-                    {person.profile_path ? (
-                      <Image
-                        src={getProfileUrl(person.profile_path, 'w185')}
-                        alt={person.name}
-                        width={185}
-                        height={185}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-zinc-600 text-lg font-bold">
-                        {person.name[0]}
-                      </div>
-                    )}
+                    <SafeImage
+                      src={person.profile_path ? getProfileUrl(person.profile_path, 'w185') : null}
+                      alt={person.name}
+                      width={185}
+                      height={185}
+                      className="w-full h-full object-cover"
+                      fallbackLabel={person.name[0]}
+                    />
                   </div>
                   <div>
                     <p className="text-white text-xs font-semibold line-clamp-1">{person.name}</p>

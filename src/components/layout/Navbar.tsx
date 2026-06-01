@@ -105,7 +105,7 @@ export default function Navbar() {
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
-        'fixed left-0 right-0 top-0 z-[100] h-[68px] transition-all duration-500',
+        'fixed left-0 right-0 top-0 z-50 h-[68px] transition-all duration-500',
         scrolled
           ? 'bg-gradient-to-b from-[#050505]/95 via-[#050505]/80 to-[#050505]/20 backdrop-blur-xl shadow-[0_1px_0_rgba(255,255,255,0.06)]'
           : 'bg-gradient-to-b from-black/80 via-black/55 to-transparent backdrop-blur-md'

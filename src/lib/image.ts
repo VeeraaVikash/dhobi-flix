@@ -15,7 +15,7 @@ function cleanImageBase(base: string): string {
 }
 
 function buildImageUrl(path: string | null | undefined, size: string): string {
-  if (!path) return '/placeholder.jpg';
+  if (!path) return '';
   const base = cleanImageBase(publicConfig.tmdb.imageBase);
   return `${base}/${size}${path}`;
 }

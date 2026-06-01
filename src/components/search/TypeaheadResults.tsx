@@ -1,13 +1,13 @@
 'use client';
 
-import { useRef, useEffect } from 'react';
-import Image from 'next/image';
+import { useRef } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Film, Tv, User, TrendingUp, ArrowUpRight } from 'lucide-react';
 import { getPosterUrl, getProfileUrl } from '@/lib/image';
 import { cn, formatYear, truncateText } from '@/lib/utils';
 import { ROUTES } from '@/constants/routes';
+import SafeImage from '@/components/movie/SafeImage';
 import type { SearchMultiResult, Movie, TVShow, PersonResult } from '@/types/movie';
 
 interface TypeaheadResultsProps {
@@ -90,19 +90,13 @@ function ResultItem({
     >
       {/* Thumbnail */}
       <div className="w-10 h-14 rounded-sm overflow-hidden bg-zinc-800 flex-shrink-0 relative">
-        {posterPath ? (
-          <Image
-            src={thumbUrl}
-            alt={title}
-            fill
-            className="object-cover"
-            sizes="40px"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <Icon size={14} className="text-zinc-600" />
-          </div>
-        )}
+        <SafeImage
+          src={posterPath ? thumbUrl : null}
+          alt={title}
+          fill
+          className="object-cover"
+          sizes="40px"
+        />
       </div>
 
       {/* Text */}
